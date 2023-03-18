@@ -11,7 +11,9 @@
     NAPOLETANI. 
     IN NAPOLI MDCCXXVIII. 
     Nella Stamperia di Felice Mosca. 
+	
 ***
+
   _Con licenza de' Superiori._ 
 
 
@@ -135,7 +137,7 @@ Dell' Ecc. VV.
 
 ### A CHI LEGGE.
 
-QU_antunque l'invenzion della 
+_QUantunque l'invenzion della 
 Danza sia antichissima per 
 quello, che ne scrivono mol[-]
 ti Autori, che tratta[-]
@@ -374,7 +376,7 @@ Kal.Septembris, anno cIoIocc!!XXVIII!!.
 Em. V. 
 
 >> _Humill. ac Addictiss. Famulus_ 
->>
+
 >> Dominicus Vanalesta. 
 
 _Attenta supradicta relatione, Im[-]
@@ -426,7 +428,7 @@ Agosto 1728.
 Di V.E. 
 
 >> _Umiliss. e Devotiss. Servidore_
->>
+
 >> Domenico Gentile. 
 
 _Visa relatione imprimatur, & in 
@@ -613,7 +615,7 @@ della cadenza, e de' tempi suoi, senza
 la cui intelligenza non si può nel ballo 
 alcuno passo formare. Nel quinto luo[-]
 go dichiareremo tutti i passi del ballo 
-nobile, de' quali ad uno ad uno[[опечатка дважды написано ad uno]], e 
+nobile, de' quali ad uno ad uno[[опечатка: дважды написано ad uno]], e 
 partitamente trattando, mosterremo 
 la positura, l'equilibrio, i movimenti, 
 ed il valore: e queste cose non sola[-]
@@ -1234,33 +1236,26 @@ ti.
 _I Passi del Ballo Nobile sono 
 i seguenti._
 
-| Semplice, o Natu[-]
-rale. |  _Simple, ou Natu[-]
-rel._ |
+| Semplice, o Naturale. |  _Simple, ou Naturel._ |
 | ----------------------------- | ------------------------------ |
-|Piegato,e Rialza[-]
-to. | _Plié, & Relevé._ |
+|Piegato,e Rialzato. | _Plié, & Relevé._ |
 | Pirola. | _Piroüette._ |
 | Saltante. | _Sauté._ |
 | Gittato. | _Jetté._ |
 | Mezzo Gittato. | _Demi-Jetté._ |
 | Mezzo Tronco. | _Demi-Coupé._ |
 | Tronco. | _Coupé._ |
-| Sfuggito. | _Eschapé, ou Sail[-]
-li._ |
+| Sfuggito. | _Eschapé, ou Sailli._ |
 | Scacciato. | _Chassé._ |
 | Fioretto. |  _De Bouréé, ou 
 Fleuret._ |
-{28} | Contratempo. | _Contre[-]
-temps._ |
-| Mezzo Contrat[-]
-tempo. | _Demi-Contretemps._ |
+| {28} Contratempo. | _Contretemps._ |
+| Mezzo Contrattempo. | _Demi-Contretemps._ |
 | Di Rigodone. | _De Rigaudon._ |
 | Di Sissone. | _De Sissonne._ |
 | Unito. | _Assemblé._ |
 | Di Gagliarda. | _De Gagliarde._ |
-| Grave. | _Grave,ou de Cou[-]
-rante._ |
+| Grave. | _Grave,ou de Courante._ |
 | Bilanciato. | _Balancé._ |
 | Cadente. | _Tombé._ |
 | La Sdrucciolata. | _Glissade._ |
@@ -1287,7 +1282,7 @@ cheremo, abbiavi alcuni altri pochi
 segni, i quali, a coloro, che vogliono 
 saper porre in iscritto le danze, sono 
 necessarj; tuttavia non trattando io 
-della Corografia[[видимо опечатка, пропущена h. Ранее он это слово писал иначе]], ovvero dell'arte di 
+della Corografia[[опечатка: пропущена h. Ранее он это слово писал иначе]], ovvero dell'arte di 
 {30} scriver le danze, stata già da altri suf[-]
 ficientemente insegnata, ma sì sola[-]
 mente dell'arte del Ballo; ho dovuto 
@@ -3048,7 +3043,7 @@ sta degli aspettanti.
 ### _Avvertimenti generali a co[-]
     loro, che vogliono perfet[-]
     tamente imprendere il 
-    Ballo Nobile. 
+    Ballo Nobile._ 
 
 TUtte le scienze, e le arti, e ge[-]
 neralmente le cose tutte, che 
