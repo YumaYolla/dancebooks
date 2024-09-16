@@ -25,21 +25,6 @@ class Availability(enum.Enum):
 			return Availability.AvailableElsewhere
 
 
-class FinalizingContext:
-	"""
-	Contains objects required for finalizing parsed data set
-	"""
-	def __init__(self, index):
-		self._renderer = markdown.make_note_renderer(index)
-
-	def parse_markdown(self, data):
-		self._renderer.reset()
-		# erasing added <p> tags
-		return self._renderer.convert(data)\
-			.removeprefix("<p>")\
-			.removesuffix("</p>")
-
-
 class BibItem:
 	"""
 	Class representing a bibliography item
@@ -53,6 +38,9 @@ class BibItem:
 
 	def __hash__(self):
 		return hash(self.get("id"))
+
+	def get_heuristical_authors(self):
+		return self.get("author") or self.get("pseudo_author") or self.get("compiler")
 
 	@property
 	def type(self):
@@ -163,7 +151,7 @@ class BibItem:
 		if key in self._params:
 			raise RuntimeError(f"Can't set {key} twice for item {self.id}")
 		self._params[key] = value
-		#TODO: move to finalize_item()
+		#TODO: move to finalize()
 		self._params["all_fields"] += BibItem.value_to_string(value, "")
 		#warning handling value in a dirty unconfigured way
 		if key == "url":
@@ -178,25 +166,12 @@ class BibItem:
 	def fields(self):
 		return set(self._params.keys())
 
-	def finalize_item(self):
-		self.set("cite_label", utils.make_cite_label(self))
-
-	def finalize_item_set(self, ctx):
+	def finalize(self):
 		"""
 		Method to be called once after parsing every entries.
-		Processes crossref tag, merging _params of current entry and parent one
+		Renders note from 
 		"""
-		note = self.get("note")
-		if note is not None:
-			#TODO: create converter once per item set, not once per item
-			#parsing markdown and removing paragraph markup added by parser
-			self._params["note"] = ctx.parse_markdown(note)
-
-		#crossref processing inherits some of the parameters
-		#and therefore it should go last
-		crossref = self.get("crossref")
-		if crossref is not None:
-			self._params["crossref"] = ctx.parse_markdown("[" + crossref + "]")
+		self.set("cite_label", utils.make_cite_label(self))
 
 class ParserState(enum.Enum):
 	NoItem = 0
@@ -270,7 +245,7 @@ class BibParser:
 	def parse_folder(path):
 		"""
 		Parses all .bib files in given folder.
-		Returns a tuple (parsed_iten, search_index) containing all items found
+		Returns a tuple (parsed_items, search_index) containing all items found
 		"""
 		if not os.path.isdir(path):
 			raise Exception("Path to folder expected")
@@ -290,10 +265,8 @@ class BibParser:
 		executor.shutdown()
 
 		item_index = search_index.Index(parsed_items)
-		fin_ctx = FinalizingContext(item_index)
 		for item in parsed_items:
-			item.finalize_item_set(fin_ctx)
-		item_index.update(parsed_items)
+			item.finalize()
 		return (parsed_items, item_index)
 
 	def _parse_file(self, path):
@@ -431,7 +404,6 @@ class BibParser:
 				if c.isspace():
 					continue
 				elif c == ')':
-					item.finalize_item()
 					items.append(item)
 					item = BibItem()
 					self.state = ParserState.NoItem

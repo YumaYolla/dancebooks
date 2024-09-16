@@ -1,3 +1,4 @@
+import logging
 import os.path
 import re
 import threading
@@ -19,6 +20,20 @@ CSS_CLASS_NOTE = "note"
 CSS_CLASS_NOTE_ANCHOR = "note_anchor"
 
 
+class _MtRenderer:
+	"""
+	Wraps markdown.Markdown object and locks it for thread-safety purposes
+	"""
+	def __init__(self, md_renderer):
+		self._lock = threading.Lock()
+		self._renderer = md_renderer
+
+	def convert(self, markup):
+		with self._lock:
+			self._renderer.reset()
+			return self._renderer.convert(markup)
+
+
 def make_transcription_renderer():
 	renderer = markdown.Markdown(
 		extensions=[
@@ -32,6 +47,7 @@ def make_transcription_renderer():
 	renderer.inlinePatterns.register(MarkdownSubscript(), name="subscript", priority=-4)
 	renderer.inlinePatterns.register(MarkdownSuperscript(), name="superscript", priority=-5)
 	renderer.inlinePatterns.register(MarkdownHyphen(), name="hyphen", priority=-6)
+	renderer.inlinePatterns.register(MarkdownGuess(), name="guess", priority=-7)
 
 	renderer.parser.blockprocessors.deregister("hashheader")
 	renderer.parser.blockprocessors.register(
@@ -49,7 +65,7 @@ def make_transcription_renderer():
 		name="note",
 		priority=1002,
 	)
-	return renderer
+	return _MtRenderer(renderer)
 
 
 def make_note_renderer(index):
@@ -57,7 +73,7 @@ def make_note_renderer(index):
 		output_format="xhtml5"
 	)
 	renderer.inlinePatterns.register(MarkdownCite(index), name="cite", priority=-1)
-	return renderer
+	return _MtRenderer(renderer)
 
 
 class MarkdownCache:
@@ -68,9 +84,9 @@ class MarkdownCache:
 	Tracks file changing and recompiles files when necessary
 	"""
 	def __init__(self):
-		self._lock = threading.Lock()
 		#dict: file abspath -> (source file mtime, compiled html data)
 		self._cache = dict()
+		self._cache_lock = threading.Lock()
 		self._renderer = make_transcription_renderer()
 
 	def get(self, abspath):
@@ -78,7 +94,7 @@ class MarkdownCache:
 		Main entry point of the function.
 		abspath is path to be read and compiled
 		"""
-		with self._lock:
+		with self._cache_lock:
 			modified_at = os.path.getmtime(abspath)
 			rendered_at, rendered_data = self._cache.get(abspath, (None, None))
 			if (
@@ -86,19 +102,21 @@ class MarkdownCache:
 				(modified_at <= rendered_at)
 			):
 				return rendered_data
-		rendered_data = self.render(abspath)
-		with self._lock:
+		rendered_data = self.render_from_file(abspath)
+		with self._cache_lock:
 			self._cache[abspath] = (modified_at, rendered_data)
 		return rendered_data
 
-	def render(self, abspath):
+	def render_from_str(self, raw_data):
+		return self._renderer.convert(raw_data)
+
+	def render_from_file(self, abspath):
 		"""
 		Helper function for performing compilation
 		of a markdown file to HTML
 		"""
-		self._renderer.reset()
 		raw_data = utils.read_utf8_file(abspath)
-		return self._renderer.convert(raw_data)
+		return self.render_from_str(raw_data)
 
 
 class MarkdownCite(markdown.inlinepatterns.Pattern):
@@ -193,8 +211,8 @@ class MarkdownHyphen(markdown.inlinepatterns.Pattern):
 	"""
 	Handles hyphenation signs.
 	At the time, removes both
-	* `[-]` (represents printed hyphen). These are kept in the transcription to make typed text match the printed one.
-	* `[-?]` (represents missing hyphen)
+	* `[-]` Represents printed hyphen. These are kept in the transcription to make typed text match the printed one
+	* `[-?]` Represents missing hyphen. These are kept in the transcription to make typ
 	"""
 	def __init__(self):
 		super().__init__(
@@ -213,6 +231,19 @@ class MarkdownHyphen(markdown.inlinepatterns.Pattern):
 		else:
 			# remove non-meaning hyphen
 			return ""
+
+
+class MarkdownGuess(markdown.inlinepatterns.Pattern):
+	"""
+	Handles parts of the text guesses during transcription
+	Renders `fa[ce?]` as `fa[ce]`.
+	"""
+	def __init__(self):
+		super().__init__(r"\[(?P<guess>[\w\s]+)\?\]")
+
+	def handleMatch(self, m):
+		guess = m["guess"]
+		return f"[{guess}]"
 
 
 class MarkdownAlignRight(markdown.blockprocessors.BlockProcessor):

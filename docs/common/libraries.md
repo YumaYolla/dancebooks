@@ -285,3 +285,76 @@ Excerpts from [Copyright, Permission, Acknowledgements and Data Protection](http
 > * Where copying is for educational use within a teaching environment
 >
 > Where none of these apply copyright permission must be obtained from the copyright owner before any copying from our rare books and archives takes place.
+
+## York University in Toronto, Canada
+
+> Hello Mary
+>
+> While online copy remains incomplete, I would like to make the complete copy available on my website.
+>
+> Could you, please, clarify the license of the files provided by archive.org?
+>
+> (also, if any license / copyright is applied to the photos sent by you, please, let me know).
+
+---
+
+> Yuriy,
+>
+> The short excerpt that I provided to you is permitted under Canadian fair dealing guidelines for personal research.
+> I regret that I am unable to advise you regarding copyright/licensing issues with respect to further use of the material.
+> Please also note that the Internet Archive is hosted in the US.
+>
+> Mary
+>
+> ---
+>
+> Mary Kandiuk MA MLS
+>
+> Visual Arts, Design, Theatre and Dance Librarian / Senior Librarian
+>
+> York University Libraries
+
+## Latvijas Nacionālā bibliotēka
+
+Excerpts from [Digitization on Request] rules of the library and the [Copyright Law](https://likumi.lv/ta/en/en/id/5138-copyright-law) of the Republic.
+
+> Lietotajam ir tiesības saņemt darba digitālo kopiju no LNB krājuma materiāliem un lietot to,
+> ievērojot Latvijas Republikā spēkā esošos normatīvos aktus un Autortiesību likumu.
+
+---
+
+> Copyright shall be in effect for the entire lifetime of an author and for 70 years after the death of an author,
+> except for the cases specified in Section 37 of this Law.
+
+## Biblioteca civica del comune del Rovereto
+
+**FREE DOWNLOADS WERE NOT PERMITTED.**
+
+> Dear Chiara,
+>
+> thanks a lot for the scans.
+>
+> While these scans are quite good for my personal use,
+> I also run a bibliography website at bib.hda.org.ru,
+> where many of the primary sources are listed and available for free download.
+> Could you, please, clarify the license status of the scans you have sent to me?
+> For example, Universitätsbiliothek Salzburg licenses their scans under CC-BY license,
+> so I put them online even if the library does not.
+
+---
+
+> Dear Yuriy,
+>
+> I am writing to follow up on your request of 22 June 2024.
+>
+> After a careful consideration of your proposal,
+> I regret to inform you that according to our policy
+> we cannot allow you to upload the scans on your bibliography website for free download.
+>
+> ...
+>
+> Please, do not hesitate to get in touch if you any further question or request.
+>
+> With best wishes,
+>
+> Thomas DC

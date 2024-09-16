@@ -330,22 +330,20 @@ def validate_single_filename(abspath, filename, item, errors):
 	if type in MULTIENTRY_ENTRY_TYPES:
 		return
 	metadata = utils.extract_metadata_from_file(filename)
-	#validating optional author, edition, tome
-	#in case when item specifies value, but filename does not
-	optional_meta_fields = [
-		"author"
+	# validating optional author, edition, tome
+	# in case when item specifies value, but filename does not
+	mandatory_meta_fields = [
+		# French contredanse 1-folio edition might omit the author's name
+		# "author",
+		"edition",
+		"volume",
+		# For serial books, no number is present in metadata
+		# Temporary disable check here
+		# "number",
+		"part",
 	]
-	if type:
-		optional_meta_fields += [
-			"edition",
-			"volume",
-			#For serial books, no number is present in metadata
-			#Temporary disable check here
-			#"number",
-			"part"
-		]
 
-	for meta_field in optional_meta_fields:
+	for meta_field in mandatory_meta_fields:
 		if (
 			(item.has(meta_field)) and
 			(meta_field not in metadata)
@@ -476,7 +474,8 @@ def validate_isbn(item, errors):
 		if (formatted != single_isbn):
 			errors.add(f"ISBN #{idx} ({single_isbn}) should be reformatted to {formatted}")
 		if (isbn.isbn_type(single_isbn) != 'ISBN13'):
-			errors.add(f"ISBN-10 #{idx} ({single_isbn}) should be reformatted to ISBN-13 {formatted}")
+			isbn13 = isbn.to_isbn13(single_isbn)
+			errors.add(f"ISBN-10 #{idx} ({single_isbn}) should be reformatted to ISBN-13 {isbn13}")
 
 
 def validate_issn(item, errors):
@@ -604,7 +603,7 @@ def validate_commentator(item, errors):
 			errors.add("Field commentator expected")
 
 
-def validate_url_validity(item, errors):
+def validate_url(item, errors):
 	"""
 	Checks url for validity
 	"""
@@ -885,7 +884,7 @@ def validate_item(item, git_added_on, make_extra_checks):
 	validate_issn(item, errors)
 	validate_type(item, errors)
 	validate_commentator(item, errors)
-	validate_url_validity(item, errors)
+	validate_url(item, errors)
 	validate_volume(item, errors)
 	validate_month(item, errors)
 	validate_pages(item, errors)

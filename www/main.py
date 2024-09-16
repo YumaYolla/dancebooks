@@ -10,7 +10,6 @@ import random
 import sys
 
 import flask
-from flaskext import markdown as flask_markdown
 import flask_babel
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -27,6 +26,7 @@ from dancebooks import utils_flask
 items, item_index = bib_parser.BibParser().parse_folder(config.parser.bibdata_dir)
 
 markdown_cache = markdown.MarkdownCache()
+note_renderer = markdown.make_note_renderer(item_index)
 
 debug_mode = False
 
@@ -56,29 +56,12 @@ def init_apps():
 flask_app, babel_app = init_apps()
 flask_app.config["BABEL_DEFAULT_LOCALE"] = utils.first(config.www.languages)
 flask_app.config["USE_EVALEX"] = False
-flask_markdown_app = flask_markdown.Markdown(flask_app)
 
 flask_app.jinja_env.trim_blocks = True
 flask_app.jinja_env.lstrip_blocks = True
 flask_app.jinja_env.keep_trailing_newline = False
 
-#filling jinja filters
-flask_app.jinja_env.filters["author_link"] = utils_flask.make_author_link
-flask_app.jinja_env.filters["keyword_link"] = utils_flask.make_keyword_link
-flask_app.jinja_env.filters["as_set"] = utils_flask.as_set
-flask_app.jinja_env.filters["translate_language"] = utils_flask.translate_language
-flask_app.jinja_env.filters["translate_type"] = utils_flask.translate_type
-flask_app.jinja_env.filters["translate_keyword_category"] = utils_flask.translate_keyword_cat
-flask_app.jinja_env.filters["translate_keyword_ref"] = utils_flask.translate_keyword_ref
-flask_app.jinja_env.filters["is_url_self_served"] = utils.is_url_self_served
-flask_app.jinja_env.filters["format_date"] = utils_flask.format_date
-flask_app.jinja_env.filters["format_pages"] = utils_flask.format_pages
-flask_app.jinja_env.filters["format_number"] = utils_flask.format_number
-flask_app.jinja_env.filters["format_catalogue_code"] = utils_flask.format_catalogue_code
-flask_app.jinja_env.filters["format_item_id"] = utils_flask.format_item_id
-flask_app.jinja_env.filters["format_transcription_url"] = utils_flask.format_transcription_url
-flask_app.jinja_env.filters["format_guid_for_rss"] = utils_flask.format_guid_for_rss
-flask_app.jinja_env.filters["format_transcribed_by"] = utils_flask.format_transcribed_by
+utils_flask.fill_jinja_filters(flask_app.jinja_env.filters, item_index)
 
 
 def jinja_self_served_url_size(url, item):
@@ -297,7 +280,7 @@ def get_book_pdf(book_id, index):
 @flask_app.get("/books/<string:item_id>/transcription")
 @utils_flask.check_id_redirections("item_id")
 @utils_flask.log_exceptions()
-def get_book_markdown(item_id):
+def get_transcription(item_id):
 	items = item_index["id"].get(item_id)
 	if items is None:
 		flask.abort(
@@ -313,13 +296,14 @@ def get_book_markdown(item_id):
 			f"Transcription for item {item_id} is not available"
 		)
 
-	markdown_file = os.path.join(
-		config.parser.markdown_dir,
-		transcription
-	)
+	transcription_path = f"{config.parser.markdown_dir}/{transcription}"
+	transcription_note = item.get("transcription_note")
+	if transcription_note:
+		transcription_note = note_renderer.convert(transcription_note)
 	return flask.render_template(
 		"markdown.html",
-		markdown_data=markdown_cache.get(markdown_file),
+		transcription_note=transcription_note,
+		transcription_data=markdown_cache.get(transcription_path),
 		item=item
 	)
 

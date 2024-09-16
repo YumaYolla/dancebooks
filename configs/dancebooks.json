@@ -71,6 +71,7 @@
             "books.google.de",
             "books.google.fr",
             "books.google.ru",
+            "books.google.rs",
             "books.google.ua",
 
             // use self-hosted files instead
@@ -84,8 +85,13 @@
             "catalogue.bnf.fr",
 
             "dhds.org.uk",
+
+            // use search.rsl.ru permalinks instead
             "dlib.rsl.ru",
+
+            // use www.loc.gov permalinks instead
             "hdl.loc.gov",
+
             "mirrorland.rpg.ru",
             "jscholarship.library.jhu.edu",
 
@@ -94,6 +100,7 @@
             "digital.blb-karlsruhe.de",
             "haab-digital.klassik-stiftung.de",
             "mdz-nbn-resolving.de",
+            "nbn-resolving.org",
             "opacplus.bsb-muenchen.de",
             "reader.digitale-sammlungen.de",
             "stimmbuecher.digitale-sammlungen.de",
@@ -101,6 +108,19 @@
 
             // use modern www.nypl.org permalinks instead
             "catalog.nypl.org",
+            
+            // It would be nice to ban this and use soeg.kb.dk permalinks instead.
+            // Unfortunately, certain entries are not catologues in the latter catalogue.
+            // "img.kb.dk"
+            
+            // use soeg.kb.dk permalinks instead
+            "rex.kb.dk",
+            
+            // use www.digitalniknihovna.cz instead
+            "kramerius.mzk.cz",
+            "kramerius.nkp.cz",
+            "kramerius5.mzk.cz",
+            "kramerius5.nkp.cz",
         ],
         "blocked_domains_http": [
             "archive.org",
@@ -291,10 +311,12 @@
             "NLS": "the National Library of Scotland",
             "UBS": "the Universitätsbibliothek Salzburg",
             "NCL": "the Newcastle University Library",
+            "LNB": "the National Library of Latvia",
             "Bodhi": null,
             "Garold": null,
             "Georg": null,
             "Glorf": null,
+            "Fialko": null,
             "Rostik": null,
             "Open": null
         },
@@ -348,15 +370,14 @@
             "source_file",
             "type",
             "catalogue",
-            "plate_number"
+            "plate_number",
         ],
         "inverted_index_params": [
             "keywords",
-            "langid"
+            "langid",
         ],
         "index_unique_params": [
             "id",
-            "catalogue"
         ],
         "languages": [
             "en",
@@ -428,8 +449,6 @@
             "giraudet_1890": "giraudet_1890_traite",
             "giraudet_1890_moderne": "giraudet_1913_moderne",
             "glover_1846": "glover_1846_lee_walker",
-            "gourdoux_daux_1819": "gourdoux_daux_1819_bnf",
-            "gourdoux_daux_1819_undated": "gourdoux_daux_1819_bne",
             "grant_1893": "grant_1893_teachers",
             "guillaume_1769_caracteres": "guillaume_1770_caracteres",
             "hart_1815": "hart_1829_thirteenth_duet",
@@ -599,6 +618,20 @@
             "harpe_1823_no06": "",
             "meykelchel_1856_russe": "mikel_1856_russe_us",
             "mikel_1860_russe": "mikel_1856_russe_us",
+            "laskosky_1830": "laskosky_1828_manuscript",
+            "zamacola_1796": "zamacola_1796_ciencia_1st",
+            "mereaux_1760_maintien": "mereau_1760_maintien",
+            "hullin_1800_quadrilles": "hullin_1797_quadrilles",
+            "collinet_1825_unique": "collinet_1829_unique",
+            "gotz_1777": "gotz_1775_mannheim",
+            "dubois_1769_allemandes": "dubois_1784_allemandes",
+            "gourdoux_daux_1819": "gourdoux_daux_1819_recueil",
+            "gourdoux_daux_1819_bne": "gourdoux_daux_1819_recueil",
+            "gourdoux_daux_1819_bnf": "gourdoux_daux_1819_recueil",
+            "gourdoux_daux_1819_undated": "gourdoux_daux_1819_recueil",
+            "moroda_1982": "moroda_1982_catalogue",
+            "jullien_1844_ferrent_polka": "jullien_1844_ferrett",
+            "jullien_1844_ferrent_description": "jullien_1844_ferrett",
         }
     }
 }

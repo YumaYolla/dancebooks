@@ -136,14 +136,16 @@ def extract_metadata_from_file(path):
 		else:
 			result[param] = value
 
-	if (number := match.group("number")) is not None:
+	if number := match.group("number1"):
+		result["number"] = number.lstrip("0")
+	if number := match.group("number2"):
 		result["number"] = number.lstrip("0")
 
 	author = match.group("author")
-	if (author is not None):
+	if author := match.group("author"):
 		result["author"] = strip_split_list(author, ",")
 
-	if (keywords := match.group("keywords")) is not None:
+	if keywords := match.group("keywords"):
 		result["keywords"] = set()
 		for keyword in strip_split_list(keywords, ","):
 			if keyword.startswith("incomplete "):
@@ -168,14 +170,14 @@ def make_searches_from_metadata(metadata):
 	"""
 	result = {}
 
-	edition = metadata.get("edition")
-	if edition is not None:
+	
+	if edition := metadata.get("edition"):
 		result["edition"] = search.search_for_eq("edition", edition)
-	part = metadata.get("part")
-	if part is not None:
+	
+	if part := metadata.get("part"):
 		result["part"] = search.search_for_eq("part", part)
-	number = metadata.get("number")
-	if number is not None:
+	
+	if number := metadata.get("number"):
 		result["number"] = search.or_([
 			search.search_for_eq("number", number),
 			search.search_for_eq("serial_number", number)
@@ -277,32 +279,40 @@ def is_url_valid(url, item):
 	"""
 	if is_url_local(url):
 		return True
-	split_result = urlparse.urlsplit(url)
-	if len(split_result.scheme) == 0:
-		logging.debug("Scheme isn't specified")
+	split = urlparse.urlsplit(url)
+	if split.scheme not in ("http", "https"):
+		logging.debug(f"Scheme {split.scheme!r} is wrong")
 		return False
-	elif len(split_result.netloc) == 0:
+	if not split.netloc:
 		logging.debug("Network location isn't specified")
 		return False
-	elif len(split_result.fragment) != 0:
+	if split.fragment:
 		logging.debug("Fragments aren't allowed")
 		return False
 
-	#validating blocked domains
-	hostname = split_result.hostname
-	if hostname.startswith("www."):
-		hostname = hostname[4:]
-	for blocked_domain in config.parser.blocked_domains:
-		if hostname.endswith(blocked_domain):
-			logging.debug(f"Domain {split_result.hostname} is blocked")
+	host = split.hostname
+	
+	# normalize host
+	host_normailized = host.removeprefix("www.")
+	
+	# validating blocked domains
+	if host_normailized in config.parser.blocked_domains:
+		logging.debug(f"{host=} is blocked")
+		return False
+
+	if re := const.URL_REGEXPS.get(host):
+		match = re.match(url)
+		if not match:
+			logging.debug(f"URL {url} should match {re.pattern}")
 			return False
 
-	#validating domains blocked for insecure (http) access
+	# validating domains blocked for insecure (http) access
+	# FIXME: this is a deprecated solution for the case, rewrite using URL_REGEXP
 	if (
-		(hostname in config.parser.blocked_domains_http) and
-		(split_result.scheme == "http")
+		(host in config.parser.blocked_domains_http) and
+		(split.scheme == "http")
 	):
-		logging.debug(f"Domain {split_result.hostname} is blocked for insecure access")
+		logging.debug(f"{host=} is blocked for insecure access")
 		return False
 
 	return True
@@ -482,12 +492,12 @@ def make_cite_label(item):
 	bibliography style in square brackets
 	"""
 	shorthand = item.get("shorthand")
-	author = item.get("author") or item.get("pseudo_author") or item.get("compiler")
+	author = item.get_heuristical_authors()
 	year = item.get("year")
 	langid = item.get("langid")
 	if (author is None) and (shorthand is None):
 		raise ValueError("Can't make cite label without author or shorthand")
-	if shorthand is not None:
+	if shorthand:
 		return f"[{shorthand}, {year}]"
 	elif len(author) <= const.MAX_AUTHORS_IN_CITE_LABEL:
 		### WARN: this code doesn't process repeated surnames in any way
@@ -507,7 +517,7 @@ def make_html_cite(item):
 	Returns full citation, formatted according to some simple style
 	"""
 	result = ""
-	author = item.get("author")
+	author = item.get_heuristical_authors()
 	langid = item.get("langid")
 	title = item.get("title") or item.get("incipit")
 	location = item.get("location")
@@ -515,7 +525,7 @@ def make_html_cite(item):
 	journaltitle = item.get("journaltitle")
 	number = item.get("number")
 	year = item.get("year")
-	if author is not None:
+	if author:
 		result += "<em>"
 		result += ", ".join(author[0:const.MAX_AUTHORS_IN_CITE_LABEL])
 		if len(author) > const.MAX_AUTHORS_IN_CITE_LABEL:

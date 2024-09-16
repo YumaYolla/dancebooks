@@ -16,7 +16,7 @@ SHORT_LANG_MAP = {
 	"de": ["german", "french", "latin"],
 	"dk": ["danish"],
 	"ee": ["estonian"],
-	"en": ["english", "latin"],
+	"en": ["english", "french", "latin"],
 	"es": ["spanish"],
 	"fi": [
 		"finnish",
@@ -29,8 +29,16 @@ SHORT_LANG_MAP = {
 	"fr": ["french", "latin"],
 	"ie": ["english"],
 	"it": ["italian", "french"],
-	"lt": ["latvian"],
-	"nl": ["dutch", "german", "french"],
+	"lt": [
+		"latvian",
+		"russian",
+	],
+	"nl": [
+		"dutch",
+		"english",
+		"german",
+		"french",
+	],
 	"nz": ["english"],
 	"no": ["norwegian"],
 	"pl": ["french", "polish"],
@@ -38,7 +46,8 @@ SHORT_LANG_MAP = {
 	"ru": ["russian", "french", "german"],
 	"sc": ["english"],
 	"si": ["slovenian", "english", "german"],
-	"sw": ["swedish", "french"],
+	"se": ["swedish", "french"],
+	"sw": ["german"],
 	"ua": ["ukrainian"],
 	"us": [
 		# We do not distinct American and British English, they are just English
@@ -85,11 +94,13 @@ LONG_LANG_MAP = {
 	},
 	"dutch.bib": {
 		"dutch",
+		"english",
 		"french",
 		"german",
 	},
 	"english.bib": {
 		"english",
+        "french",
 		"latin",
 	},
 	"estonian.bib": {
@@ -114,6 +125,10 @@ LONG_LANG_MAP = {
 		"french",
 		"italian",
 		"latin",
+	},
+	"latvian.bib": {
+		"latvian",
+		"russian",
 	},
 	"mexican.bib": {
 		"spanish",
@@ -142,6 +157,10 @@ LONG_LANG_MAP = {
 		"swedish",
 		"french",
 	},
+	"swiss.bib": {
+		"german",
+		"french",
+	},
 }
 
 META_INCOMPLETE = "incomplete"
@@ -149,21 +168,23 @@ META_HAS_OWNER = "has_owner"
 
 #a structired pattern for file basename
 METADATA_PATTERN = r"(?:incomplete|[\w\s\-\&\+\.']+ copy)"
-FILENAME_PATTERN = (
-	#year: digits can be replaced by dashes
+FILENAME_REGEXP = re.compile(
+	# year: digits can be replaced by dashes
 	r"\[(?P<year>[\d\-]+), "
-	#lang: two-letter code
+	# lang: two-letter code
 	r"(?P<langid>\w{2})\] "
-	#author: optional, can contain
+	# author: optional, can contain
 	#   spaces (Thomas Wilson),
 	#   dots (N. Malpied),
 	#   commas (Louis Pecour, Jacques Dezais)
-	#(question mark at the end makes regexp non-greedy)
+	# (question mark at the end makes regexp non-greedy)
 	r"(?:(?P<author>[\w\s\.,'\-]+?) - )?"
-	#title: sequence of words, digits, spaces, punctuation
-	#(question mark at the end makes regexp non-greedy)
+	# optional serial number which can be prefixed to a title
+	r"(?:(?P<number1>\d+)\. )?"
+	# title: sequence of words, digits, spaces, punctuation
+	# (question mark at the end makes regexp non-greedy)
 	r"(?P<title>[\w\d\s',\.\-–—&«»‹›„”“№!\?\(\);]+?)"
-	#metadata: optional sequence of predefined values
+	# metadata: optional sequence of predefined values
 	#   tome (, tome 2)
 	#   edition (, edition 10)
 	#   part(, partie 1)
@@ -171,7 +192,7 @@ FILENAME_PATTERN = (
 	#   (something copy) — for books with multiple different copies known
 	r"(?:"
 		r"(?:, tome (?P<volume>\d+))|"
-		r"(?:, number (?P<number>[\w\- ]+))|"
+		r"(?:, number (?P<number2>[\w\- ]+))|"
 		r"(?:, édition (?P<edition>\d+))|"
 		r"(?:, partie (?P<part>\d+))|"
 		r"(?: \((?P<keywords>" + METADATA_PATTERN + r"(?:, " + METADATA_PATTERN + r")*)\))"
@@ -180,7 +201,6 @@ FILENAME_PATTERN = (
 	r"(\.pdf|\.md|)"
 	"$"
 )
-FILENAME_REGEXP = re.compile(FILENAME_PATTERN)
 
 ID_PATTERN = r"[a-z][a-z_0-9]+"
 ID_REGEXP = re.compile(ID_PATTERN)
@@ -188,24 +208,25 @@ ID_REGEXP = re.compile(ID_PATTERN)
 PAGES_PATTERN = r"\d+(–\d+)?"
 PAGES_REGEXP = re.compile(PAGES_PATTERN)
 
-CATALOGUE_PATTERN = (
+CATALOGUE_PATTERN = "|".join([
 	#Printed books in Francine Lancelot's "La belle danse"
-	r"(Lancelot:\d{4}\.\d)|"
+	r"(Lancelot:\d{4}\.\d)",
 	#Manuscripts in Francine Lancelot's "La belle danse"
-	r"(Lancelot:Ms\d{2})|"
+	r"(Lancelot:Ms\d{2})",
 	#‹Ludus Pastorali› manuscript from Francine Lancelot's "La belle danse"
-	r"(Lancelot:Addendum)|"
+	r"(Lancelot:Addendum)",
 	#Printed books in Little-Marsh's "La danse noble"
-	r"(LittleMarsh:\*?\[?c?\d{4}\]?-\w{3})|"
+	r"(LittleMarsh:\*?\[?c?\d{4}\]?-\w{3})",
 	#Manuscripts in Little-Marsh's "La danse noble"
-	r"(LittleMarsh:Ms-\d{2})|"
+	r"(LittleMarsh:Ms-\d{2})",
 	#Wilhelm Gottlieb Becker's Taschenbüchern in Lange's "Modetänze um 1800"
-	r"(Lange:\d{4}(, I{1,2})?)|"
-	r"(Smith:[\[\]A-Za-z\d]+)|"
-	r"(Gallo:[A-Za-z']{1,3})|"
-	r"(Marrocco:[A-Z\d, ]+)|"
-	r"(NLR[24J]:I{1,2}\.\d+[a-z]?)"
-)
+	r"(Lange:\d{4}(, I{1,2})?)",
+	r"(Smith:[\[\]A-Za-z\d]+)",
+	r"(Gallo:[A-Za-z']{1,3})",
+	r"(Marrocco:[A-Z\d, ]+)",
+	r"(NLR[24J]:I{1,2}\.\d+[a-z]?)",
+	r"(DdM:M?\d{2,5})",
+])
 CATALOGUE_REGEXP = re.compile(CATALOGUE_PATTERN)
 #map [catalogue type] -> (catalogue id, catalogue title)
 CATALOGUE_MAP = {
@@ -218,6 +239,7 @@ CATALOGUE_MAP = {
 	"NLR2": ("nlr_catalogue_2005", "Сводный каталог российских нотных изданий"),
 	"NLR4": ("nlr_catalogue_2017_foreign", "Сводный каталог российских нотных изданий"),
 	"NLRJ": ("nlr_catalogue_2008_jusupov", "Юсуповская коллекция"),
+	"DdM": (None, "Derra de Moroda Tanzarchiv"),
 }
 
 VALID_HTTP_CODES = {
@@ -258,3 +280,7 @@ INVERTED_INDEX_KEY_PREFIX = "!"
 MAX_AUTHORS_IN_CITE_LABEL = 2
 
 SIZE_DELIMETER = "x"
+
+URL_REGEXPS = {
+	"polona.pl": re.compile(r"https://polona.pl/item-view/(?P<guid>[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12})"),
+}

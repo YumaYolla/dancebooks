@@ -64,13 +64,13 @@ def add(force):
 
 
 @main.command()
-@click.option("--id", type=int, required=True, help="Id of the backup to be updated")
+@click.option("--id", type=int, required=True, help="Id of the backup to be shown")
 def get(id):
 	if id == 0:
 		print("Backup id is required")
 		sys.exit(1)
 	with db.make_transaction() as session:
-		backup = session.query(db.Backup).get(id)
+		backup = session.get(db.Backup, id)
 		print(f"Path:\n{backup.path}")
 		print(f"Provenance:\n{backup.provenance}")
 		print(f"Note:\n{backup.note}")
@@ -85,6 +85,7 @@ def get(id):
 @click.option("--note", type=str, default=None, help="Set backup note to the given value (markdown supported)")
 @click.option("--image-size", type=str, default=None, help=f"Set backup image size to the given value ({SIZE_FORMAT})")
 @click.option("--aspect-ratio", type=str, default=None, help=f"Set backup image aspect ratio to the given value ({SIZE_FORMAT})")
+@click.option("--type", type=str, default=None, help="Set backup to the given value")
 def update(
 	id,
 	path,
@@ -92,9 +93,10 @@ def update(
 	note,
 	image_size,
 	aspect_ratio,
+	type,
 ):
 	with db.make_transaction() as session:
-		backup = session.query(db.Backup).get(id)
+		backup = session.get(db.Backup, id)
 		modified = False
 		if path is not None:
 			path = fixup_path(path)
@@ -115,6 +117,9 @@ def update(
 		if aspect_ratio is not None:
 			backup.aspect_ratio_x, backup.aspect_ratio_y = map(int, aspect_ratio.split(const.SIZE_DELIMETER))
 			modified = True
+		if type is not None:
+			backup.type = type
+			modified = True
 		if modified:
 			session.add(backup)
 			session.commit()
@@ -125,12 +130,12 @@ def update(
 
 @main.command()
 @click.option("--id", type=int, required=True, help="Id of the backup to be deleted")
-def delete():
+def delete(id):
 	if id == 0:
 		print("Backup id is required")
 		sys.exit(1)
 	with db.make_transaction() as session:
-		backup = session.query(db.Backup).get(id)
+		backup = session.get(db.Backup, id)
 		print(f"You are going to delete backup #{id} at '{backup.path}'")
 		confirmation = input("Type YES to continue: ")
 		if confirmation == "YES":

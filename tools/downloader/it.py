@@ -1,23 +1,9 @@
-import os
 from base64 import urlsafe_b64encode
+import json
+import os
 
 import iiif
 import utils
-
-
-prefix = "MagTeca - ICCU"
-
-
-def _encode_once(raw):
-	return urlsafe_b64encode(raw.encode()).decode()
-
-
-def _encode_twice(raw):
-	return urlsafe_b64encode(urlsafe_b64encode(raw.encode())).decode()
-	
-
-def _make_full_id(id):
-	return f"oai:www.internetculturale.sbn.it/{id}"
 
 
 def get_internet_culturale(id):
@@ -30,7 +16,8 @@ def get_internet_culturale(id):
 	page_url_base = f"http://www.internetculturale.it/jmms/objdownload?id={full_id}&teca={prefix}&resource=img&mode=raw"
 	
 	output_folder = utils.make_output_folder("iculturale", id)
-	for page in range(1, 1000):
+	for page in range(1, 1000
+):
 		page_url = f"{page_url_base}&start={page}"
 		print(f"Downloading page #{page} from {page_url}")
 		output_filename = utils.make_output_filename(output_folder, page=page, extension="jpg")
@@ -43,10 +30,37 @@ def get_internet_culturale(id):
 			break
 
 
+def get_rovereto(*, id):
+	manifest_url = f"https://digitallibrary.bibliotecacivica.rovereto.tn.it/server/iiif/{id}/manifest"
+	manifest_text = utils.get_text(manifest_url)
+	# rovereto.tn.it IIIF server returns incorrect json which is split info multiple short lines.
+	# Join them into single line before parsing.
+	manifest = json.loads(manifest_text.replace("\r\n", ""))
+	
+	output_folder = utils.make_output_folder("rovereto", id[0:8])
+	iiif.download_book_fast(manifest, output_folder)
+
+
 def get_sbn(id):
+	def _encode_once(raw):
+		return urlsafe_b64encode(raw.encode()).decode()
+
+	def _encode_twice(raw):
+		return urlsafe_b64encode(urlsafe_b64encode(raw.encode())).decode()
+
+	def _make_full_id(id):
+		return f"oai:www.internetculturale.sbn.it/{id}"
+
+	PREFIX = "MagTeca - ICCU"
 	full_id = _make_full_id(id)
-	encoded_prefix = _encode_twice(prefix)
+	encoded_prefix = _encode_twice(PREFIX)
 	encoded_full_id = _encode_once(full_id)
 	manifest_url = f"https://jmms.iccu.sbn.it/jmms/metadata/{encoded_prefix}/{encoded_full_id}/manifest.json"
 	output_folder = utils.make_output_folder("sbn", id)
 	iiif.download_book_fast_v3(manifest_url, output_folder)
+
+
+def get_vatlib(*, id):
+	manifest_url = f"http://digi.vatlib.it/iiif/{id}/manifest.json"
+	output_folder = make_output_folder("vatlib", id)
+	iiif.download_book(manifest_url, output_folder)

@@ -61,13 +61,14 @@ def download_image(base_url, output_filename):
 	utils.download_and_sew_tiles(output_filename, UrlMaker(), policy)
 
 
-def download_book(manifest_url, output_folder):
+def download_book(manifest: str | dict, output_folder):
 	"""
 	Downloads entire book via IIIF protocol.
 	API is documented here:
 	http://iiif.io/about/
 	"""
-	manifest = utils.get_json(manifest_url)
+	if isinstance(manifest, str):
+		manifest = utils.get_json(manifest)
 	canvases = manifest["sequences"][0]["canvases"]
 	for page, metadata in enumerate(canvases):
 		output_filename = utils.make_output_filename(output_folder, page)
@@ -78,13 +79,32 @@ def download_book(manifest_url, output_folder):
 		download_image(base_url, output_filename)
 
 
+def download_image_fast_v1(base_url, output_filename):
+	"""
+	Download image as a single tile
+	"""
+	info_url = f"{base_url}/info.json"
+	info = utils.get_json(info_url)
+	w = info["width"]
+	h = info["height"]
+	img_url = f"{base_url}/0,0,{w},{h}/{w},{h}/0/default.jpg"
+	utils.get_binary(output_filename, img_url)
+
+
 def _download_image_fast(metadata, page, output_filename):
-	full_url = metadata["images"][-1]["resource"]["@id"]
-	print(f"Downloading page #{page:04d} from {full_url}")
-	utils.get_binary(output_filename, full_url)
+	url = None
+	if not url:
+		# Certain installations (only opendata.uni-halle.de so far)
+		# provide higher resolution images in 'rendering' section
+		url = metadata.get("rendering", [{}])[-1].get("@id", "")
+	if not url:
+		url = metadata["images"][-1]["resource"]["@id"]
+
+	print(f"Downloading page #{page:04d} from {url}")
+	utils.get_binary(output_filename, url)
 
 
-def download_book_fast(manifest_url, output_folder):
+def download_book_fast(manifest: dict | str, output_folder):
 	"""
 	Downloads entire book via IIIF protocol (v2).
 	Issues single request per image, but might be unsupported by certain backends.
@@ -92,7 +112,8 @@ def download_book_fast(manifest_url, output_folder):
 	API is documented here:
 	http://iiif.io/about/
 	"""
-	manifest = utils.get_json(manifest_url)
+	if isinstance(manifest, str):
+		manifest = utils.get_json(manifest)
 	canvases = manifest["sequences"][0]["canvases"]
 	for page, metadata in enumerate(canvases):
 		output_filename = utils.make_output_filename(output_folder, page, extension="jpg")
@@ -139,6 +160,6 @@ def download_book_fast_v3(manifest_url, output_folder):
 		if os.path.isfile(output_filename):
 			print(f"Skip downloading existing page #{page:04d}")
 			continue
-		image_url = metatata["items"][0]["items"][0]["body"]["id"]
+		image_url = metadata["items"][0]["items"][0]["body"]["id"]
 		print(f"Downloading page #{page:04d} from {image_url}")
 		utils.get_binary(output_filename, image_url)
